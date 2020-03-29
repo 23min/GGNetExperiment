@@ -1,0 +1,77 @@
+@page "/linechart"
+
+@using GGNet 
+@using System.Linq
+
+@inject HttpClient Http
+
+@if (ts == null)
+{
+    <p>Loading...</p>
+}
+else
+{
+    <div>
+        <GGNet.Components.Plot Data=@ts T=Sighting TX=double TY=double @ref=@plot />
+    </div>
+}
+
+@code {
+
+    Source<Sighting> source = new Source<Sighting>();
+
+    Data<Sighting, double, double> ts;
+    
+    GGNet.Components.Plot<Sighting, double, double> plot;
+
+    //private Sighting[] ufos;
+
+    protected override async Task OnInitializedAsync()
+    {
+        var ufos = await Http.GetJsonAsync<SightingInput[]>("sample-data/ufo-sightings.json");
+
+        var ufoSightings = ufos.Select(s => new Sighting() {
+            Year = Convert.ToDouble(s.year),
+            Sightings = Convert.ToDouble(s.sightings)
+        }).ToArray();
+
+        source = new Source<Sighting>(ufoSightings);
+
+        var theme = Theme.Default(dark: false);
+
+        theme.Panel.Grid.Major.X.Alpha = 0.5;
+        theme.Panel.Grid.Minor.X.Alpha = 0.25;
+        theme.Panel.Grid.Major.Y.Alpha = 0.5;
+        theme.Panel.Grid.Minor.Y.Alpha = 0.25;
+
+        ts = Plot.New(source, x: o => o.Year, y: o => o.Sightings)
+            .Geom_Line(width:2, color: "#333333")
+            .Title("Ufo Sightings")
+            .Theme(theme: theme, legend: GGNet.Position.Bottom);
+        
+
+    }
+
+    public class SightingInput
+    {
+        public string year {get;set;}
+        public int sightings {get;set;}
+    }
+
+    public enum Series
+    {
+        Confirmed
+    }
+
+    public class Sighting
+    {
+        public Series Series {get;set;}
+        public double Year {get;set;}
+        public double Sightings {get;set;}
+    }
+
+    @* private class TS
+    {
+        public Sighting[] Sightings {get;set;}
+    } *@
+}
