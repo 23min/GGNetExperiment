@@ -19,6 +19,25 @@
         <a class="dismiss">🗙</a>
     </div>
     <script src="_framework/blazor.webassembly.js"></script>
+
+    <script>
+        /*Blazor devs have decreed that we can't have script tags because idiots try to modify them at runtime (see https://github.com/aspnet/Blazor/issues/552)
+         but you can bypass the error with that attribute*/
+        var instance;
+        function startAnimation(i) {
+            instance = i;
+            requestAnimationFrame(animationFrameJS);
+        }
+        function animationFrameJS(timestamp) {
+            instance.invokeMethodAsync('AnimationFrame', timestamp).then(
+                function (shouldContinue) {
+                if (shouldContinue) {
+                    requestAnimationFrame(animationFrameJS);
+                } else console.log("Got signal to stop calling");},
+                function () { console.log("invokeAsync failed");/*this never actually gets called*/ }
+            );
+        }
+    </script>
 </body>
 
 </html>

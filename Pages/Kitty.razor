@@ -1,0 +1,51 @@
+@page "/Kitty"
+@inject IJSRuntime JSRuntime
+@implements IDisposable
+@{
+    double bigAngle = getAngle(1);
+    int imageCenterX = 500 + (int)(400 * Math.Sin(bigAngle));
+    int imageCenterY = 500 - (int)(400 * Math.Cos(bigAngle));
+}
+<h1>KITTEH!</h1>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 1000" style="background-color:lightgray; max-height:500px /*I don't know CSS, shut up*/">
+    <image width="200" height="200" x="@(imageCenterX - 100)" y="@(imageCenterY - 100)"
+           transform="rotate(@((int)(getAngle(-2) * 360 / Tau)),@imageCenterX,@imageCenterY)"
+           href="@imgUrl" />
+</svg>
+
+@code{
+
+    const string imgUrl = "https://placekitten.com/100/100";
+    const double Tau = 2 * Math.PI;
+    double getAngle(double turnsPerSecond) => (turnsPerSecond * timestamp.TotalSeconds * Tau) % Tau;
+    string toStr(double d) => d.ToString(System.Globalization.CultureInfo.InvariantCulture);
+    DotNetObjectReference<Kitty> referenceToSelf;
+    bool finished = false;
+
+    TimeSpan timestamp;//could have been a double but might as well do it right
+
+    override protected void OnAfterRender(bool firstRender)
+    {
+        //we have to make a proxy object to pass to javascript, to refer to this 
+        //even though the SignalR connection obviously already knows what instance it's talking to 
+        //and we probably should dispose of it when navigating away 
+        referenceToSelf = DotNetObjectReference.Create(this);
+        if (firstRender) JSRuntime.InvokeAsync<int>("startAnimation", referenceToSelf);
+    }
+    
+    [JSInvokable]
+    public bool AnimationFrame(double milliseconds)
+    {
+        //even disposing referenceToSelf won't stop the JS loop so we have to do it ourselves
+        if (finished) return false;
+        timestamp = TimeSpan.FromMilliseconds(milliseconds);
+        StateHasChanged();
+        return true;
+    }
+
+    public void Dispose()
+    {
+        referenceToSelf?.Dispose();
+        finished = true;
+    }
+}
