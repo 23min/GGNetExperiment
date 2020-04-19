@@ -1,0 +1,110 @@
+
+@inject IJSRuntime JSRuntime
+@implements IDisposable
+
+
+
+<svg id=@Id xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 @Width @Height">
+
+    
+    @foreach (var r in Rectangles)
+    {
+        <rect 
+        id=@r.Id,
+        x=@(r.X) 
+        y=@(r.Y) 
+        width=@(r.Width) 
+        height=@r.Height 
+        style="fill:rgb(222,222,222);stroke-width:0.5;stroke:rgb(20,20,20)"
+        @onclick="@(() => ChangeDirection(r.Id))" />
+    }
+
+    <rect id="stop" x="0" y="0" width="50" height="50" style="fill:rgb(222,0,0);stroke-width:0.5;stroke:rgb(20,20,20)" @onclick="StopAnimation" />
+    <rect id="start" x="55" y="0" width="50" height="50" style="fill:rgb(0,222,0);stroke-width:0.5;stroke:rgb(20,20,20)" @onclick="StartAnimation" />
+
+
+</svg>
+
+@code{
+    [Parameter]
+    public string Id {get;set;}
+
+    [Parameter]
+    public int Width {get;set;}
+    
+    [Parameter]
+    public int Height {get;set;}
+
+    [Parameter]
+    public List<Rectangle> Rectangles {get;set;}
+
+    private DotNetObjectReference<Canvas> referenceToSelf;
+    private bool finished = false;
+    private TimeSpan start = TimeSpan.Zero;
+    private TimeSpan timestamp;
+    private double delay = 0.5;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await Task.CompletedTask;
+    }
+
+    protected override void OnAfterRender(bool firstRender)
+    {
+        if (firstRender) StartAnimation();
+    }
+
+    [JSInvokable]
+    public bool AnimationFrame(double milliseconds)
+    {
+        if (finished) return false;
+
+        timestamp = TimeSpan.FromMilliseconds(milliseconds);
+
+        if (start == TimeSpan.Zero) start = timestamp;
+        var progress = timestamp.Subtract(start);
+
+        foreach(var r in Rectangles)
+        {
+            r.Update(progress.TotalMilliseconds * delay);
+        }
+
+        StateHasChanged();
+        return true;
+    }
+
+    private void ChangeDirection(string id)
+    {
+        Random rnd = new System.Random();
+        double xComponent = rnd.NextDouble() - rnd.NextDouble();
+        double yComponent = rnd.NextDouble() - rnd.NextDouble();
+        var direction = new Vector(xComponent, yComponent);
+
+        Rectangles.Where(r => r.Id == id).Select(r => {
+            r.Direction = direction;
+            return r;
+            }
+        ).First();
+    }
+
+    private void StartAnimation()
+    {
+        finished = false;
+        if (referenceToSelf == null) referenceToSelf = DotNetObjectReference.Create(this);
+        JSRuntime.InvokeAsync<int>("startAnimation", referenceToSelf);
+        
+    }
+
+    private void StopAnimation()
+    {
+        Console.WriteLine("STOP!");
+        finished = true;
+    }
+
+    public void Dispose()
+    {
+        referenceToSelf?.Dispose();
+        finished = true;
+    }
+
+}

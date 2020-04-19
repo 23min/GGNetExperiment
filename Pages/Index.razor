@@ -1,8 +1,48 @@
 ﻿@page "/"
-
+@using BlazorSvgChart.Common
 @using BlazorSvgChart.Components
 
-<h1>A symbol</h1>
+<h1>A canvas</h1>
 
-<Symbol Id=123 Width=500 Height=500></Symbol>
+<Canvas Id=123 Width=@width Height=@height Rectangles=@rectangles></Canvas>
 
+@code {
+    
+    private int width = 1000;
+    private int height = 1000;
+    private List<Rectangle> rectangles;
+
+    private Random rnd = new System.Random();
+    
+    protected override async Task OnInitializedAsync()
+    {
+        
+        rectangles = new List<Rectangle>();
+        rectangles.Add(CreateRandomRectangle("1", width, height));
+        rectangles.Add(CreateRandomRectangle("2", width, height));
+
+        await Task.CompletedTask;
+    }
+
+    private Rectangle CreateRandomRectangle(string id, int canvasWidth, int canvasHeight)
+    {
+        var cw = rnd.Next(0, canvasWidth/10);
+        var ch = rnd.Next(0, canvasHeight/10);
+        var posx = rnd.Next(0, width - cw);
+        var posy = rnd.Next(0, height - ch);
+        double xComponent = rnd.NextDouble() - rnd.NextDouble();
+        double yComponent = rnd.NextDouble() - rnd.NextDouble();
+        var direction = new Vector(xComponent, yComponent);
+
+        return new Rectangle()
+        {
+            Id = id,
+            Height = ch,
+            Width = cw,
+            X = posx,
+            Y = posy,
+            Direction = direction
+
+        };
+    }
+}
