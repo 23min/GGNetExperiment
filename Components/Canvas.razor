@@ -65,7 +65,9 @@
 
         if (start == TimeSpan.Zero) start = timestamp;
         var progress = timestamp.Subtract(start);
+        start = TimeSpan.FromMilliseconds(milliseconds);
 
+    Console.WriteLine($"ms: {milliseconds} - p: {progress.TotalMilliseconds}");
         foreach(var r in Rectangles)
         {
             r.Update(progress.TotalMilliseconds * delay);

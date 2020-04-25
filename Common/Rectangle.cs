@@ -21,8 +21,8 @@ namespace BlazorSvgChart.Common
         {
             // new position = current position + factor * direction
 
-            X = (int) Math.Round((double)X + (milliseconds/1000) * Direction.X);
-            Y = (int) Math.Round((double)Y + (milliseconds/1000) * Direction.Y);
+            X = (int) Math.Round((double)X + (milliseconds/10) * Direction.X);
+            Y = (int) Math.Round((double)Y + (milliseconds/10) * Direction.Y);
 
             if (X < 0) X=1000;
             if (X > boundsx) X = 0;

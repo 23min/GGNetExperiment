@@ -28,7 +28,7 @@ else
 
     protected override async Task OnInitializedAsync()
     {
-        var ufos = await Http.GetJsonAsync<SightingInput[]>("sample-data/ufo-sightings.json");
+        var ufos = await Http.GetFromJsonAsync<SightingInput[]>("sample-data/ufo-sightings.json");
 
         var ufoSightings = ufos.Select(s => new Sighting() {
             Year = Convert.ToDouble(s.year),
