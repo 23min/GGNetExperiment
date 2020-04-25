@@ -16,7 +16,9 @@
         width=@(r.Width) 
         height=@r.Height 
         style="fill:rgb(222,222,222);stroke-width:0.5;stroke:rgb(20,20,20)"
-        @onclick="@(() => ChangeDirection(r.Id))" />
+        @onclick="@(() => ChangeDirection(r.Id))" 
+        @onmouseover="@(() => MouseOver(r.Id))" 
+        />
     }
 
     <rect id="stop" x="0" y="0" width="50" height="50" style="fill:rgb(222,0,0);stroke-width:0.5;stroke:rgb(20,20,20)" @onclick="StopAnimation" />
@@ -73,6 +75,20 @@
         return true;
     }
 
+    private void StartAnimation()
+    {
+        finished = false;
+        if (referenceToSelf == null) referenceToSelf = DotNetObjectReference.Create(this);
+        JSRuntime.InvokeAsync<int>("startAnimation", referenceToSelf);
+        
+    }
+
+    private void StopAnimation()
+    {
+        Console.WriteLine("STOP!");
+        finished = true;
+    }
+
     private void ChangeDirection(string id)
     {
         Random rnd = new System.Random();
@@ -87,18 +103,9 @@
         ).First();
     }
 
-    private void StartAnimation()
+    private void MouseOver(string id)
     {
-        finished = false;
-        if (referenceToSelf == null) referenceToSelf = DotNetObjectReference.Create(this);
-        JSRuntime.InvokeAsync<int>("startAnimation", referenceToSelf);
-        
-    }
-
-    private void StopAnimation()
-    {
-        Console.WriteLine("STOP!");
-        finished = true;
+        Console.WriteLine($"Mouseover: {id}");
     }
 
     public void Dispose()
