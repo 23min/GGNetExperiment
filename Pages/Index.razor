@@ -1,10 +1,12 @@
 ﻿@page "/"
 @using BlazorSvgChart.Common
 @using BlazorSvgChart.Components
+@using BlazorSvgChart.Bus
 
 <h1>A canvas</h1>
 
-<Canvas Id=123 Width=@width Height=@height Rectangles=@rectangles></Canvas>
+@* <Canvas Id=123 Width=@width Height=@height Rectangles=@rectangles></Canvas> *@
+    <Canvas Id=123 Width=@width Height=@height Rectangles=@rectangles ActorSystem=@actorSystem></Canvas>
 
 @code {
     
@@ -12,11 +14,20 @@
     private int height = 1000;
     private List<Rectangle> rectangles;
 
+    private ActorSystem actorSystem;
+
     private Random rnd = new System.Random();
     
     protected override async Task OnInitializedAsync()
     {
+        actorSystem = new ActorSystem();
+
+        string initialStateJson = string.Empty;
+        actorSystem.LoadInitialState(initialStateJson);
+
         
+
+
         rectangles = new List<Rectangle>();
         rectangles.Add(CreateRandomRectangle("1", width, height));
         rectangles.Add(CreateRandomRectangle("2", width, height));

@@ -1,4 +1,5 @@
-
+@using BlazorSvgChart.Bus
+@using System.Diagnostics
 @inject IJSRuntime JSRuntime
 @implements IDisposable
 
@@ -16,7 +17,6 @@
         width=@(r.Width) 
         height=@r.Height 
         style="fill:rgb(222,222,222);stroke-width:0.5;stroke:rgb(20,20,20)"
-        @onclick="@(() => ChangeDirection(r.Id))" 
         @onmouseover="@(() => MouseOver(r.Id))" 
         />
     }
@@ -26,6 +26,7 @@
 
 
 </svg>
+        @* @onclick="@(() => ChangeDirection(r.Id))"  *@
 
 @code{
     [Parameter]
@@ -39,6 +40,9 @@
 
     [Parameter]
     public List<Rectangle> Rectangles {get;set;}
+
+    [Parameter]
+    public ActorSystem ActorSystem {get;set;}
 
     private DotNetObjectReference<Canvas> referenceToSelf;
     private bool finished = false;
@@ -57,7 +61,7 @@
     }
 
     [JSInvokable]
-    public bool AnimationFrame(double milliseconds)
+    public async Task<bool> AnimationFrame(double milliseconds)
     {
         if (finished) return false;
 
@@ -67,11 +71,24 @@
         var progress = timestamp.Subtract(start);
         start = TimeSpan.FromMilliseconds(milliseconds);
 
-    Console.WriteLine($"ms: {milliseconds} - p: {progress.TotalMilliseconds}");
-        foreach(var r in Rectangles)
+        //Console.WriteLine($"ms: {milliseconds} - p: {progress.TotalMilliseconds}");
+
+        // Actor System
+        Stopwatch sw = Stopwatch.StartNew();
+        //Console.WriteLine($"AnimationFrame: Dispatch (@{sw.ElapsedMilliseconds}");
+        ActorSystem.DispatchMessages(15);
+        var msRemaining = 15 - sw.ElapsedMilliseconds;
+        //Console.WriteLine($"AnimationFrame: Process (@{sw.ElapsedMilliseconds}");
+        await ActorSystem.Process(msRemaining);
+        if (sw.ElapsedMilliseconds > 15)
+        {
+            Console.WriteLine($"AnimationFrame: Done ({sw.ElapsedMilliseconds})");
+        }
+
+        @* foreach(var r in Rectangles)
         {
             r.Update(progress.TotalMilliseconds * delay);
-        }
+        } *@
 
         StateHasChanged();
         return true;
