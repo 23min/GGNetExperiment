@@ -48,7 +48,7 @@
     private bool finished = false;
     private TimeSpan start = TimeSpan.Zero;
     private TimeSpan timestamp;
-    private double delay = 0.5;
+    //private double delay = 0.5;
 
     protected override async Task OnInitializedAsync()
     {
@@ -76,10 +76,13 @@
         // Actor System
         Stopwatch sw = Stopwatch.StartNew();
         //Console.WriteLine($"AnimationFrame: Dispatch (@{sw.ElapsedMilliseconds}");
+        // TODO: Better estimate for budget. Use 15ms for now.
         ActorSystem.DispatchMessages(15);
         var msRemaining = 15 - sw.ElapsedMilliseconds;
+
         //Console.WriteLine($"AnimationFrame: Process (@{sw.ElapsedMilliseconds}");
-        await ActorSystem.Process(msRemaining);
+        await ActorSystem.Process(progress.TotalMilliseconds, msRemaining);
+
         if (sw.ElapsedMilliseconds > 15)
         {
             Console.WriteLine($"AnimationFrame: Done ({sw.ElapsedMilliseconds})");

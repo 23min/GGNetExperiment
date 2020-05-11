@@ -10,6 +10,8 @@ namespace BlazorSvgChart.Common
         public double X => x;
         public double Y => y;
 
+        public bool IsNullVector => x + y == 0;
+
         public Vector(double x, double y)
         {
             this.x = x;

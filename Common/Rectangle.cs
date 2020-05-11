@@ -2,13 +2,14 @@ using System;
 
 namespace BlazorSvgChart.Common
 {
-    public class Rectangle
+    public class Rectangle : IShape
     {
-        public string Id;
-        public int Width;
-        public int Height; 
-        public int X;
-        public int Y;
+        public string Id {get;set;}
+        public int Width {get;set;}
+        public int Height {get;set;}
+        public int X {get;set;}
+        public int Y {get;set;}
+
         public (int, int, int) RgbFill;
         public (int, int, int) RgbStroke;
 
@@ -16,6 +17,11 @@ namespace BlazorSvgChart.Common
 
         private int boundsx = 1000;
         private int boundsy = 1000;
+
+        public string Render()
+        {
+            throw new NotImplementedException();
+        }
 
         public void Update(double milliseconds)
         {

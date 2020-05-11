@@ -16,12 +16,12 @@ namespace BlazorSvgChart.Bus
             Registry = registry;
         }
 
-        public void Dispatch(int milliseconds)
+        public void Dispatch(int budgetMs)
         {
             Stopwatch sw = Stopwatch.StartNew();
 
             //Console.WriteLine($"Dispatch: {milliseconds} ms");
-            while(sw.ElapsedMilliseconds < milliseconds)
+            while(sw.ElapsedMilliseconds < budgetMs)
             {
                 //Console.WriteLine($"Elapsed: {sw.ElapsedMilliseconds}");
                 // read system messages and send to destination mailboxes
@@ -47,7 +47,7 @@ namespace BlazorSvgChart.Bus
                 }
             }
 
-            while(sw.ElapsedMilliseconds < milliseconds)
+            while(sw.ElapsedMilliseconds < budgetMs)
             {
                 // read remaining messages and send to destination mailboxes
                 var msg = MessageBus.Dequeue();
